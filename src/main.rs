@@ -3,6 +3,9 @@ use std::path::Path;
 use std::io;
 use std::env;
 
+use actix_web::middleware::Logger;
+use env_logger;
+
 use actix_web::{get, web, App, HttpServer, Responder};
 mod controller;
 mod service;
@@ -23,10 +26,17 @@ async fn index() -> &'static str {
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "actix_web=info");
+    env_logger::init();
+
     HttpServer::new(|| {
         App::new()
+            .wrap(Logger::default())
+            .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
             .service(controller::configs)
+            .service(controller::conf)
+            .service(controller::make)
     })
     .bind("127.0.0.1:7090")?
     .workers(1)
