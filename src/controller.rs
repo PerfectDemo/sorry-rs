@@ -1,5 +1,6 @@
 use actix_web::{get, web, HttpResponse, Result, HttpRequest, post };
 use serde::{Deserialize, Serialize};
+use actix_files::NamedFile;
 
 #[derive(Serialize, Deserialize)]
 struct MyObj {
@@ -33,13 +34,13 @@ pub async fn conf(req: HttpRequest) -> Result<HttpResponse> {
 #[derive(Serialize, Deserialize)]
 pub struct MakeItem {
     pub name: String,
-    pub sentence: Vec<String>
+    pub sentences: Vec<String>
 }
 
 #[post("/api/make")]
-pub async fn make(item: web::Json<MakeItem>) -> String {
-    service::make(&item);
-    String::from("make")
+pub async fn make(item: web::Json<MakeItem>) -> Result<NamedFile> {
+    let git_path = service::make(&item).unwrap();
+    Ok(NamedFile::open(git_path)?)
 }
 
 // pub async fn make() -> Result<HttpResponse> {

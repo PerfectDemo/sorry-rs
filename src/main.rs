@@ -6,7 +6,7 @@ use std::env;
 use actix_web::middleware::Logger;
 use env_logger;
 
-use actix_web::{get, web, App, HttpServer, Responder};
+use actix_web::{get, web, App, HttpServer, Responder, middleware};
 mod controller;
 mod service;
 
@@ -31,6 +31,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .wrap(middleware::Compress::default())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
